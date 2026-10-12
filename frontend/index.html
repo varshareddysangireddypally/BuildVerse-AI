@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BuildVerse AI</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f6ff;
+      color: #202044;
+    }
+
+    header {
+      padding: 22px 8%;
+      background: white;
+      border-bottom: 1px solid #e5e7f3;
+      font-size: 22px;
+      font-weight: bold;
+    }
+    header span { color: #6755df; }
+
+    main { max-width: 760px; margin: 55px auto; padding: 0 20px; }
+
+    .tag {
+      color: #6755df;
+      font-weight: bold;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 12px;
+    }
+
+    h1 { font-size: 42px; line-height: 1.15; margin-bottom: 12px; }
+    h1 span { color: #6755df; }
+    .intro { color: #686980; line-height: 1.7; }
+
+    .panel {
+      background: white;
+      margin-top: 28px;
+      padding: 26px;
+      border: 1px solid #e5e7f3;
+      border-radius: 18px;
+      box-shadow: 0 10px 35px #25245b0d;
+    }
+
+    label { display: block; font-weight: bold; margin: 18px 0 8px; }
+
+    textarea, select {
+      width: 100%;
+      padding: 13px;
+      border: 1px solid #d9daea;
+      border-radius: 9px;
+      font: inherit;
+      background: white;
+    }
+    textarea { min-height: 110px; resize: vertical; }
+
+    button {
+      width: 100%;
+      margin-top: 22px;
+      padding: 15px;
+      background: #6755df;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+    button:hover { background: #5140c4; }
+    button:disabled { background: #a79fe8; cursor: wait; }
+
+    #result {
+      display: none;
+      margin-top: 24px;
+      padding: 22px;
+      background: #f0edff;
+      border-radius: 12px;
+      line-height: 1.7;
+    }
+    #result h2 { margin-top: 0; }
+
+    footer { text-align: center; padding: 25px; color: #77788c; font-size: 13px; }
+
+    @media (max-width: 500px) {
+      h1 { font-size: 32px; }
+      main { margin-top: 35px; }
+    }
+
+    .examples { margin-bottom: 16px; }
+    .examples p { color: #686980; font-size: 14px; }
+
+    .example-btn {
+      width: auto;
+      display: inline-block;
+      margin: 4px 4px 4px 0;
+      padding: 9px 12px;
+      background: #f0edff;
+      color: #5140c4;
+      border: 1px solid #ded8ff;
+      border-radius: 20px;
+      font-size: 13px;
+    }
+    .example-btn:hover { background: #ded8ff; }
+
+    /* Sketch upload */
+    .upload-box {
+      display: block;
+      margin: 0;
+      padding: 22px;
+      text-align: center;
+      border: 2px dashed #c9c3f5;
+      border-radius: 12px;
+      background: #faf9ff;
+      color: #5140c4;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .upload-box:hover, .upload-box:focus-within { background: #f0edff; }
+    .upload-box small { display: block; margin-top: 4px; color: #686980; font-weight: normal; }
+    .upload-box input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+
+    .preview { display: none; margin-top: 12px; align-items: center; gap: 14px; }
+    .preview img {
+      max-width: 140px;
+      max-height: 110px;
+      border-radius: 8px;
+      border: 1px solid #e5e7f3;
+    }
+    .preview .remove-btn {
+      width: auto;
+      margin: 0;
+      padding: 8px 14px;
+      background: white;
+      color: #5140c4;
+      border: 1px solid #ded8ff;
+      font-size: 13px;
+    }
+
+    .error-box {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: #fff1f1;
+      border: 1px solid #f3c4c4;
+      border-radius: 9px;
+      color: #8a2b2b;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; }
+    .chips li {
+      padding: 6px 12px;
+      background: white;
+      border: 1px solid #e5e0ff;
+      border-radius: 20px;
+      font-size: 14px;
+    }
+
+    .phase {
+      margin-top: 14px;
+      padding: 14px;
+      background: white;
+      border: 1px solid #e5e0ff;
+      border-radius: 12px;
+    }
+    .phase-head { display: flex; align-items: center; gap: 12px; }
+    .phase-head strong { flex: 1; }
+    .phase-head small { color: #686980; white-space: nowrap; }
+    .step-number {
+      min-width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      background: #6755df;
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+    }
+    .phase ul { margin: 10px 0 0 46px; padding: 0; }
+
+    .progress-track { height: 8px; background: #dedaf5; border-radius: 10px; overflow: hidden; }
+    .progress-fill { height: 100%; width: 0%; background: #6755df; transition: width 0.2s ease; }
+
+    .progress-checklist { display: grid; gap: 10px; }
+    .progress-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin: 0;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      font-weight: normal;
+    }
+    .progress-item input { margin-top: 4px; accent-color: #6755df; }
+  </style>
+</head>
+
+<body>
+  <header>BuildVerse <span>AI ✦</span></header>
+
+  <main>
+    <p class="tag">Your idea. Your roadmap.</p>
+
+    <h1>Turn your ideas into <span>real projects.</span></h1>
+
+    <p class="intro">
+      Upload a sketch of your idea or describe it, and get a development
+      roadmap designed around your skills.
+    </p>
+
+    <section class="panel">
+      <h2>Let's build something</h2>
+      <p>Start with a sketch, a screenshot, or a few words.</p>
+
+      <form id="ideaForm">
+        <label for="sketch" class="upload-box" id="uploadBox">
+          📷 Upload a sketch or screenshot
+          <small>Hand-drawn wireframe, whiteboard photo, or app screenshot (PNG, JPG, WebP)</small>
+          <input type="file" id="sketch" accept="image/png,image/jpeg,image/webp">
+        </label>
+
+        <div class="preview" id="preview">
+          <img id="previewImg" alt="Preview of your uploaded sketch">
+          <button type="button" class="remove-btn" id="removeImg">Remove image</button>
+        </div>
+
+        <label for="idea">What do you want to build? <span style="font-weight:normal;color:#686980">(optional with a sketch)</span></label>
+
+        <div class="examples">
+          <p>Not sure where to start? Try an example:</p>
+
+          <button type="button" class="example-btn" data-idea="AI attendance system for colleges">🎓 AI Attendance System</button>
+          <button type="button" class="example-btn" data-idea="AI study planner for students">📚 AI Study Planner</button>
+          <button type="button" class="example-btn" data-idea="Smart waste management system">🌱 Smart Waste Management</button>
+        </div>
+
+        <textarea id="idea" placeholder="Example: An AI attendance system for colleges..."></textarea>
+
+        <label for="level">Your coding experience</label>
+        <select id="level">
+          <option>Beginner</option>
+          <option>Intermediate</option>
+          <option>Advanced</option>
+        </select>
+
+        <label for="technology">Preferred technology</label>
+        <select id="technology">
+          <option>Recommend for me</option>
+          <option>Python</option>
+          <option>JavaScript</option>
+          <option>Java</option>
+        </select>
+
+        <button type="submit" id="submitBtn">Generate My Roadmap ✨</button>
+      </form>
+
+      <div id="notice" aria-live="polite"></div>
+      <div id="result" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>BuildVerse AI · Build your next big idea</footer>
+
+<script>
+  const form = document.getElementById("ideaForm");
+  const result = document.getElementById("result");
+  const notice = document.getElementById("notice");
+  const submitBtn = document.getElementById("submitBtn");
+  const sketchInput = document.getElementById("sketch");
+  const preview = document.getElementById("preview");
+  const previewImg = document.getElementById("previewImg");
+
+  /* ---------- Fallback data (used only if the AI call fails) ---------- */
+  const technologyTools = {
+    "Recommend for me": {
+      Beginner: "HTML, CSS, JavaScript, and beginner-friendly tutorials",
+      Intermediate: "HTML, CSS, JavaScript, Python or Java, and APIs",
+      Advanced: "Git, modular architecture, automated testing, APIs, and deployment tools"
+    },
+    Python: {
+      Beginner: "Python basics, VS Code, and simple Python projects",
+      Intermediate: "Python, Flask, SQLite, and REST APIs",
+      Advanced: "Python, FastAPI or Flask, automated testing, databases, and deployment tools"
+    },
+    JavaScript: {
+      Beginner: "HTML, CSS, JavaScript, and browser developer tools",
+      Intermediate: "JavaScript, Node.js, Express, and REST APIs",
+      Advanced: "JavaScript or TypeScript, Node.js, automated testing, databases, and deployment tools"
+    },
+    Java: {
+      Beginner: "Java basics, JDK, and simple Java programs",
+      Intermediate: "Java, Spring Boot, SQL, and REST APIs",
+      Advanced: "Java, Spring Boot, automated testing, database design, and deployment tools"
+    }
+  };
+
+  const projectRoadmaps = {
+    attendance: {
+      goal: "Create a system that records and manages student attendance.",
+      steps: [
+        "Define how students and teachers will use the attendance system.",
+        "Design student records, class lists, and attendance entry screens.",
+        "Build attendance marking and daily attendance summaries.",
+        "Add attendance reports and test with sample student records."
+      ]
+    },
+    study: {
+      goal: "Help students organize subjects, study sessions, and deadlines.",
+      steps: [
+        "Identify subjects, exams, deadlines, and available study hours.",
+        "Design a form for entering subjects and study goals.",
+        "Build a weekly timetable with priorities and reminders.",
+        "Test the timetable with different student schedules."
+      ]
+    },
+    waste: {
+      goal: "Help communities track and improve waste collection.",
+      steps: [
+        "Identify users and the waste collection problem to solve.",
+        "Design forms for reporting waste and recording collection status.",
+        "Build waste reports and a collection tracking dashboard.",
+        "Test reports and tracking with sample collection data."
+      ]
+    },
+    default: {
+      goal: "Turn your idea into a practical, testable prototype.",
+      steps: [
+        "Identify the problem, target users, and essential features.",
+        "Design the interface and plan the application components.",
+        "Build the most important feature first.",
+        "Test with sample inputs and improve the prototype."
+      ]
+    }
+  };
+
+  // Converts the old template roadmap into the same shape the AI returns
+  function buildFallback(idea, level, technology) {
+    const text = idea.toLowerCase();
+    let type = "default";
+    if (text.includes("attendance")) type = "attendance";
+    else if (/study (planner|plan|schedule)|timetable/.test(text)) type = "study";
+    else if (/waste|garbage|recycling/.test(text)) type = "waste";
+
+    const project = projectRoadmaps[type];
+    return {
+      project_summary: project.goal,
+      detected_features: [],
+      tech_stack: [technologyTools[technology][level]],
+      phases: project.steps.map((step, i) => ({
+        title: "Step " + (i + 1),
+        estimated_hours: null,
+        tasks: [step]
+      })),
+      risks: []
+    };
+  }
+
+  /* ---------- Rendering ---------- */
+  function list(items) {
+    return Array.isArray(items) ? items.filter(Boolean) : [];
+  }
+
+  function renderRoadmap(data, level, technology, idea) {
+    
+const features = list(data.detected_features);
+const stack = list(data.tech_stack);
+const risks = list(data.risks);
+
+// Remove repeated tasks, ignoring capitalization and extra spaces.
+const seenTasks = new Set();
+
+const phases = list(data.phases).map(phase => {
+  const uniqueTasks = list(phase.tasks).filter(task => {
+    const taskText = String(task).trim();
+    const taskKey = taskText.toLowerCase().replace(/\s+/g, " ");
+
+    if (!taskKey || seenTasks.has(taskKey)) {
+      return false;
+    }
+
+    seenTasks.add(taskKey);
+    return true;
+  });
+
+  return {
+    ...phase,
+    tasks: uniqueTasks
+  };
+});
+
+const allTasks = phases.flatMap(phase => list(phase.tasks));
+
+
+    result.innerHTML = `
+      <h2>Your ${escapeHTML(level)} Roadmap 🚀</h2>
+      ${idea ? `<p><strong>Project idea:</strong> ${escapeHTML(idea)}</p>` : ""}
+      <p><strong>Preferred technology:</strong> ${escapeHTML(technology)}</p>
+
+      <h3>Project summary</h3>
+      <p>${escapeHTML(data.project_summary || "")}</p>
+
+      ${features.length ? `
+        <h3>What BuildVerse AI found in your idea</h3>
+        <ul class="chips">${features.map(f => `<li>${escapeHTML(f)}</li>`).join("")}</ul>
+      ` : ""}
+
+      <h3>Development phases</h3>
+      ${phases.map((p, i) => `
+        <div class="phase">
+          <div class="phase-head">
+            <div class="step-number">${i + 1}</div>
+            <strong>${escapeHTML(p.title || "Phase " + (i + 1))}</strong>
+            ${p.estimated_hours ? `<small>~${escapeHTML(p.estimated_hours)} hrs</small>` : ""}
+          </div>
+          <ul>${list(p.tasks).map(t => `<li>${escapeHTML(t)}</li>`).join("")}</ul>
+        </div>
+      `).join("")}
+
+      <h3>Your progress</h3>
+      <p>Tick each task as you finish it.</p>
+      <div class="progress-track"><div id="progressBar" class="progress-fill"></div></div>
+      <p id="progressText">0 of ${allTasks.length} tasks completed</p>
+
+      <div class="progress-checklist">
+        ${allTasks.map(t => `
+          <label class="progress-item">
+            <input type="checkbox" class="milestone-check">
+            <span>${escapeHTML(t)}</span>
+          </label>
+        `).join("")}
+      </div>
+
+      ${stack.length ? `
+        <h3>Suggested tools</h3>
+        <ul class="chips">${stack.map(s => `<li>${escapeHTML(s)}</li>`).join("")}</ul>
+      ` : ""}
+
+      ${risks.length ? `
+        <h3>Watch out for</h3>
+        <ul>${risks.map(r => `<li>${escapeHTML(r)}</li>`).join("")}</ul>
+      ` : ""}
+    `;
+
+    const checkboxes = result.querySelectorAll(".milestone-check");
+    const progressBar = result.querySelector("#progressBar");
+    const progressText = result.querySelector("#progressText");
+
+    function updateProgress() {
+      const done = [...checkboxes].filter(c => c.checked).length;
+      const total = checkboxes.length;
+      progressBar.style.width = (total ? (done / total) * 100 : 0) + "%";
+      progressText.textContent = `${done} of ${total} tasks completed`;
+    }
+    checkboxes.forEach(c => c.addEventListener("change", updateProgress));
+    updateProgress();
+
+    result.style.display = "block";
+    result.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function showNotice(message) {
+    notice.innerHTML = message
+      ? `<div class="error-box">${escapeHTML(message)}</div>`
+      : "";
+  }
+
+  /* ---------- Submit: call the backend ---------- */
+  form.addEventListener("submit", async function (event) {
+    event.preventDefault();
+
+    const idea = document.getElementById("idea").value.trim();
+    const level = document.getElementById("level").value;
+    const technology = document.getElementById("technology").value;
+    const image = sketchInput.files[0];
+
+    showNotice("");
+
+    if (!idea && !image) {
+      showNotice("Upload a sketch or describe your idea first.");
+      return;
+    }
+
+    const body = new FormData();
+    body.append("idea", idea);
+    body.append("level", level);
+    body.append("technology", technology);
+    if (image) body.append("image", image);
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "BuildVerse AI is building your roadmap…";
+
+    try {
+      const response = await fetch("/api/roadmap", { method: "POST", body });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || "Request failed");
+      renderRoadmap(data, level, technology, idea);
+    } catch (err) {
+      if (idea) {
+        showNotice("The AI is unavailable right now, so this is a basic template roadmap. Try again for a personalized one.");
+        renderRoadmap(buildFallback(idea, level, technology), level, technology, idea);
+      } else {
+        showNotice(err.message + " You can also describe your idea in text.");
+      }
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Generate My Roadmap ✨";
+    }
+  });
+
+  /* ---------- Image preview ---------- */
+  sketchInput.addEventListener("change", function () {
+    const file = sketchInput.files[0];
+    if (!file) return;
+    previewImg.src = URL.createObjectURL(file);
+    preview.style.display = "flex";
+  });
+
+  document.getElementById("removeImg").addEventListener("click", function () {
+    sketchInput.value = "";
+    previewImg.removeAttribute("src");
+    preview.style.display = "none";
+  });
+
+  /* ---------- Helpers ---------- */
+  function escapeHTML(text) {
+    return String(text).replace(/[&<>"']/g, function (char) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char];
+    });
+  }
+
+  document.querySelectorAll(".example-btn").forEach(function (button) {
+    button.addEventListener("click", function () {
+      document.getElementById("idea").value = button.dataset.idea;
+    });
+  });
+</script>
+</body>
+</html>
